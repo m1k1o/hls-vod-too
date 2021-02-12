@@ -1,4 +1,4 @@
-#!/usr/bin/env ts-node
+#!/usr/bin/env ts-node-script
 
 import assert = require('assert');
 import childProcess = require('child_process');
@@ -14,7 +14,6 @@ import util = require('util');
 // 3rd party
 import fsExtra = require('fs-extra');
 import express = require('express');
-import serveStatic = require('serve-static');
 import parseArgs = require('minimist');
 
 if (typeof require('fs').Dirent !== 'function') {
@@ -925,9 +924,9 @@ class HlsVod {
 
         const server = http.createServer(app);
 
-        app.use('/', serveStatic(path.join(__dirname, 'static')));
+        app.use('/', express.static(path.join(__dirname, 'static')));
 
-        app.use('/node_modules', serveStatic(path.join(__dirname, 'node_modules')));
+        app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')));
 
         app.get('/media/:file', (request, response) => {
             respond(response, this.handleInitializationRequest(request.params['file']));
@@ -957,7 +956,7 @@ class HlsVod {
             respond(response, this.browseDir(request.params['file']));
         });
 
-        app.use('/raw/', serveStatic(this.rootPath));
+        app.use('/raw/', express.static(this.rootPath));
 
         app.get('/thumbnail/:file', (request, response) => {
             const x = parseInt(request.query['x'] as string);
