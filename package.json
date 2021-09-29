@@ -16,7 +16,7 @@
     "static"
   ],
   "scripts": {
-    "start": "ts-node hls-vod.ts",
+    "start": "ts-node hls-vod.ts --debug",
     "prepare": "tsc && shebang-trim hls-vod.js"
   },
   "bin": {
