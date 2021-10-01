@@ -22,7 +22,7 @@ hls-vod-thumbnail table {
     width: 100%;
     table-layout: fixed;
     text-align: center;
-} 
+}
 
 hls-vod-thumbnail img {
     max-width: 100%;

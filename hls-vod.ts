@@ -15,7 +15,7 @@ if (require.main === module) {
             + ' --root-path PATH'
             + ' [--port PORT]'
             + ' [--cache-path PATH]'
-			+ ' [--ffmpeg-binary-dir PATH]'
+            + ' [--ffmpeg-binary-dir PATH]'
             + ' [--buffer-length SECONDS]'
             + ' [--max-client-number NUMBER]'
             + ' [--debug]'

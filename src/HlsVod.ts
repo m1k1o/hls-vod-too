@@ -34,7 +34,7 @@ type FileEntry = {
 
 /**
  * Main entry point for a program instance. You can run multiple instances as long as they use different ports and output paths.
- * 
+ *
  * Returns an async function to clean up.
  */
 export class HlsVod {
@@ -42,7 +42,7 @@ export class HlsVod {
     readonly server: http.Server;
 
     private readonly cachedMedia = new LruCacheMapForAsync<string, MediaInfo>(
-        Math.max(20), 
+        Math.max(20),
         async (key) => {
             const type = key.charAt(0);
             const path = key.substr(1);
@@ -113,7 +113,7 @@ export class HlsVod {
         existing.then(backend => backend.removeClient(clientId));
         this.clientTracker.delete(clientId);
     }
-    
+
     private async browseDir(browsePath: string): Promise<FileEntry[]> {
         const diskPath = this.context.toDiskPath(browsePath);
 
@@ -160,10 +160,10 @@ export class HlsVod {
 
         const encoderChild = this.context.exec('ffmpeg', ['-i', fsPath, '-vf', `${vf},scale=${singleWidth}:-2${onePiece ? `,tile=${xCount}x${yCount}` : ''}'`, '-f', 'image2pipe', ...(onePiece ? ['-vframes', '1'] : ''), '-'], {
             timeout: 60 * 1000
-		});
+        });
 
-		encoderChild.stdout.pipe(response);
-		response.setHeader('Content-Type', 'image/jpeg');
+        encoderChild.stdout.pipe(response);
+        response.setHeader('Content-Type', 'image/jpeg');
         request.on('close', encoderChild.kill);
     }
 
@@ -190,10 +190,10 @@ export class HlsVod {
             if (!isVideo) { assert(!!audioStream, 'Neither video or audio stream is found.'); }
             return {
                 type: isVideo ? 'video' : 'audio',
-                maybeNativelySupported: 
+                maybeNativelySupported:
                     !this.context.noShortCircuit
                     && ((isVideo ? nativeSupportedFormats.videoContainer : nativeSupportedFormats.audioContainer).includes(format))
-                    && (!audioStream || nativeSupportedFormats.audioCodec.includes(audioStream['codec_name'])) 
+                    && (!audioStream || nativeSupportedFormats.audioCodec.includes(audioStream['codec_name']))
                     && (!videoStream || nativeSupportedFormats.videoCodec.includes(videoStream['codec_name'])),
                 bufferLength: this.context.videoMinBufferLength
             };
@@ -211,7 +211,7 @@ export class HlsVod {
             promise.then(result => (((typeof result === 'string') || Buffer.isBuffer(result)) ? response.send(result) : response.json(result))).catch(defaultCatch(response));
 
         const ensureType = (typeStr: string) => (typeStr === 'video') ? 'V' : (assert.strictEqual(typeStr, 'audio'), 'A');
-        
+
         const app = express();
         app.set('query parser', 'simple');
 
@@ -230,18 +230,18 @@ export class HlsVod {
         // m3u8 file has to be under the same path as the TS-files, so they can be linked relatively in the m3u8 file
         app.get('/:type.:client/:file/master.m3u8', (request, response) => {
             respond(response, this.cachedMedia.get(ensureType(request.params['type']) + request.params['file']).then(media => media.getMasterManifest()));
-		});
-		
+        });
+
         app.get('/:type.:client/:file/quality-:quality.m3u8', (request, response) => {
             respond(response, this.getBackend(request.params['client'], ensureType(request.params['type']), request.params['file'], request.params['quality']).then(backend => backend.getVariantManifest()));
-		});
+        });
 
         app.get('/:type.:client/:file/:quality.:segment.ts', (request, response) => {
-            this.getBackend(request.params['client'], ensureType(request.params['type']), request.params['file'], request.params['quality']).then(media => 
+            this.getBackend(request.params['client'], ensureType(request.params['type']), request.params['file'], request.params['quality']).then(media =>
                 media.getSegment(request.params['client'], request.params['segment'], request, response)
             ).catch(defaultCatch);
         });
-        
+
         app.delete('/hls.:client/', (request, response) => {
             this.removeClient(request.params['client']);
             response.sendStatus(200);
@@ -281,12 +281,12 @@ export class HlsVod {
         this.context.cleanup()
 
         if (this.termination == null) {
-			this.termination = Promise.all([
-				util.promisify(this.server.close).call(this.server), // Stop the server.
-				fsExtra.remove(this.context.outputPath) // Remove all cache files.
-			]);
-		}
+            this.termination = Promise.all([
+                util.promisify(this.server.close).call(this.server), // Stop the server.
+                fsExtra.remove(this.context.outputPath) // Remove all cache files.
+            ]);
+        }
 
-		return this.termination;
+        return this.termination;
     }
 }

@@ -11,7 +11,7 @@ export abstract class MediaInfo {
         readonly relPath: string,
         readonly outDir: string,
     ) {}
- 
+
     static async createOutDir(context: Context, relPath: string): Promise<string> {
         const pathHash = crypto.createHash('md5').update(context.toDiskPath(relPath)).digest('hex');
         const outDir = path.join(context.outputPath, pathHash);
@@ -24,20 +24,20 @@ export abstract class MediaInfo {
             console.log(`[${this.relPath}]`, ...params);
         }
     }
-    
+
     abstract getBackendByQualityLevel(level: string): MediaBackend;
     abstract getMasterManifest(): string;
     abstract destruct(): Promise<void>;
 
     /**
-     * Calculate the timestamps to segment the video at. 
+     * Calculate the timestamps to segment the video at.
      * Returns all segments endpoints, including video starting time (0) and end time.
-     * 
+     *
      * - Use keyframes (i.e. I-frame) as much as possible.
      * - For each key frame, if it's over 4.75 seconds since the last keyframe, insert a breakpoint between them in an evenly, such that the breakpoint distance is <= 3.5 seconds (per https://bitmovin.com/mpeg-dash-hls-segment-length/).
      *   Example: key frame at 20.00 and 31.00, split at 22.75, 25.5, 28.25.
      * - If the duration between two key frames is smaller than 2.25 seconds, ignore the existance of the second key frame.
-     * 
+     *
      * This guarantees that all segments are between the duration 2.33 s and 4.75 s.
      */
     protected static convertToSegments(rawTimeList: Float64Array, duration: number): Float64Array {

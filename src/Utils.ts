@@ -6,7 +6,7 @@ export class SubProcessInvocation {
     private readonly process: childProcess.ChildProcess;
 
     constructor(
-        command: string, 
+        command: string,
         args: string[],
         cwd: string,
         timeout: number
@@ -36,7 +36,7 @@ export class SubProcessInvocation {
 
     async result(): Promise<string> {
         let stdoutBuf = '';
-        this.stdout.on('data', data => { 
+        this.stdout.on('data', data => {
             stdoutBuf += data;
         });
         const code = await this.promise;
@@ -67,7 +67,7 @@ export const asyncDebounce = <T> (method: () => Promise<T>): (() => Promise<T>) 
     let nextCall: Promise<T> | null = null;
     const debounced: (() => Promise<T>) = () => {
         if (!inProgress) {
-            return inProgress = method().finally(() => { 
+            return inProgress = method().finally(() => {
                 inProgress = null;
                 nextCall = null;
             });
@@ -113,7 +113,7 @@ export const asyncDebounce = <T> (method: () => Promise<T>): (() => Promise<T>) 
         this.destructions.set(key, destruction);
         return destruction;
     }
-    
+
     get(key: K): Promise<V> {
         let info = this.cache.get(key);
         if (!info) {

@@ -14,14 +14,14 @@ This is like a re-write of the original hls-vod. I certainly borrowed the main i
   - Original hls-vod transcode the entire video from beginning to the end, as a whole and in the fixed order. hls-vod-too transcode the parts you're actually playing.
   - This allows seeking immediately after loading a video. With original hls-vod, the progress bar only shows the parts of the video that has finished transcoding. You'll have to wait for the transcoding before jumping to a later time in the video. With hls-vod-too, the progress bar immediately shows the full length of the video, so you can jump to any specific time of the video.
 - Supports multiple quality levels (1080p, 720p, etc.).
-  - Done by using a [master playlist](https://developer.apple.com/documentation/http_live_streaming/example_playlists_for_http_live_streaming/creating_a_master_playlist). 
+  - Done by using a [master playlist](https://developer.apple.com/documentation/http_live_streaming/example_playlists_for_http_live_streaming/creating_a_master_playlist).
   - It allows video players to automatically switch between different qualities according to network conditions. Users can also switch between quality levels on-the-fly.
 - Detects if a video format is likely to be directly playable in the browser. If so, offer the option to play the video file directly, instead of transcoding and serving through HLS.
   - Modern browsers are capable of playing video files directly, with pretty good performance and full seeking functionality. HLS is unnecessary in this case.
   - User can fallback to use HLS on the web UI. The whole feature can also be disabled by `--no-short-circuit`.
 - Supports multiple players/transcodings at the same time.
   - The max number of concurrent users can be specified by `--max-client-number`.
-  - When multiple users play the same file (at the same quality level), the file will only be transcoded once. 
+  - When multiple users play the same file (at the same quality level), the file will only be transcoded once.
 - Better thumbnailing (a.k.a. preview).
   - Take snapshots evenly throughout the video, instead of just near the beginning of the video.
   - Allow users to select the number of images in the thumbnail tile.

@@ -79,7 +79,7 @@ class Pipe2Jpeg {
 
     read(input) {
         const outputs = [];
-        
+
         let buffer;
         if (this.buffer) {
             buffer = new Uint8Array(this.buffer.length + input.length);
@@ -103,7 +103,7 @@ class Pipe2Jpeg {
                 if (index !== finishedAt) {
                     console.warn('Extra data between JPEGs.');
                 }
-                if (buffer.length <= index + 4) { 
+                if (buffer.length <= index + 4) {
                     break;
                 }
                 if (this.imageStartPos >= 0) { throw new Error('Image already started.'); }
@@ -291,7 +291,7 @@ Tonic.add(class HlsVodThumbnail extends Tonic {
         params.append('width', width);
         params.append('one', one ? 1 : 0);
         const httpUrl = `/thumbnail/${encodeURIComponent(path)}?${params.toString()}`;
-        
+
         if (!one) {
             const response = await fetch(httpUrl);
             const reader = response.body.getReader();
@@ -338,7 +338,7 @@ Tonic.add(class HlsVodThumbnail extends Tonic {
 Tonic.add(class HlsVodMediaPre extends Tonic {
     render() {
         return this.html`<hls-vod-media path="${this.parentNode.dataset.path}"></hls-vod-media>`;
-    }  
+    }
 });
 
 const HlsVodBrowse_icons = {
@@ -363,14 +363,14 @@ Tonic.add(class HlsVodBrowse extends Tonic {
             <nav>
                 <ol class="breadcrumb">
                     <li class="${'breadcrumb-item' + (this.props.path.length ? '' : ' active')}"><a href="#directory/">Home</a></li>
-                    ${sections.map((section, index) => 
+                    ${sections.map((section, index) =>
                         this.html`<li class="${'breadcrumb-item' + ((index === sections.length - 1) ? ' active' : '')}"><a href="${'#directory/' + encodeURIComponent(sections.slice(0, index + 1).join('/'))}">${section}</a></li>`
                     )}
                 </ol>
             </nav>
             <main>
                 <ul class="list-group">
-                    ${list.map(file => 
+                    ${list.map(file =>
                         this.html`<li class="list-group-item" data-path="${pathPrefix + file.name}">
                             <div class="d-flex justify-content-between align-items-center">
                                 <a href="${`${file.type ? ((file.type === 'directory') ? '#directory' : '#media') : 'raw'}/${encodeURIComponent(pathPrefix + file.name)}`}">

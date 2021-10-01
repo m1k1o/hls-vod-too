@@ -48,7 +48,7 @@ export class MediaBackend {
     constructor(
         readonly context: Context,
         readonly config: QualityLevel,
-		readonly breakpoints: Float64Array,
+        readonly breakpoints: Float64Array,
         readonly relPath: string,
         readonly outDir: string,
     ) {
@@ -57,7 +57,7 @@ export class MediaBackend {
         this.segmentStatus = new Uint8Array(breakpoints.length - 1); // Defaults to EMPTY.
         this.segmentStatus.fill(EMPTY);
     }
-    
+
     // Range between [2, 253].
     private findNextAvailableId(): number {
         // Find the first usable one.
@@ -88,7 +88,7 @@ export class MediaBackend {
         }
 
         const commaSeparatedTimes = [].map.call(
-            this.breakpoints.subarray(startAt + 1, endAt), 
+            this.breakpoints.subarray(startAt + 1, endAt),
             (num: number) => num.toFixed(6) // AV_TIME_BASE is 1000000, so 6 decimal digits will match.
         ).join(',');
 
@@ -218,7 +218,7 @@ export class MediaBackend {
                     break;
                 }
             }
-            return (shouldStartFromSegment >= 0) ? { 
+            return (shouldStartFromSegment >= 0) ? {
                 client,
                 firstToEncode: shouldStartFromSegment,
                 bufferedLength: shouldStartFromSegment - segmentIndex,
@@ -239,7 +239,7 @@ export class MediaBackend {
             }
             return true; // There isn't an existing encoder head for it yet!
         }).sort((a, b) => a.firstToEncode - b.firstToEncode);
-        
+
         // Kill all encoder heads that are unused.
         for (const encoder of encoders.values()) {
             if (!encoder.clients.length) {
@@ -259,7 +259,7 @@ export class MediaBackend {
             const process = this.startTranscode(current.firstToEncode);
             current.ref.transcoder = process;
             lastStartedProcess = { index: current.firstToEncode, process };
-        }        
+        }
     });
 
     private async onGetSegment(clientInfo: ClientStatus, segmentIndex: number): Promise<void> {

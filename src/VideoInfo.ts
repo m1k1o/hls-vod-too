@@ -19,7 +19,7 @@ export class VideoInfo extends MediaInfo {
     private readonly breakpoints: Float64Array;
 
     private constructor(
-        context: Context, 
+        context: Context,
         relPath: string,
         outDir: string,
         ffProbeResult: string
@@ -55,20 +55,20 @@ export class VideoInfo extends MediaInfo {
         }
 
         // prepare qualtiy levels
-        this.qualityLevels = new Map(presets.map(preset => 
+        this.qualityLevels = new Map(presets.map(preset =>
             [preset.name, {
                 preset,
                 width: Math.round(width / resolution * preset.resolution),
                 height: Math.round(height / resolution * preset.resolution),
                 backend: null
             }]
-        )); 
+        ));
 
         this.log(`Video information initialized. Using output directory ${this.outDir}.`);
     }
 
     static async getInstance(
-        context: Context, 
+        context: Context,
         relPath: string
     ): Promise<VideoInfo> {
         const ffprobeOutput = await (context.exec('ffprobe', [
@@ -92,7 +92,7 @@ export class VideoInfo extends MediaInfo {
         if (!level.backend) {
             new MediaBackend(this.context, level, this.breakpoints, this.relPath, this.outDir);
         }
-    
+
         return level.backend!;
     }
 

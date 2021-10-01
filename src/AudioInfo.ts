@@ -11,11 +11,11 @@ export class AudioInfo extends MediaInfo {
     readonly backend: MediaBackend;
 
     private constructor(
-        context: Context, 
+        context: Context,
         relPath: string,
-		outDir: string,
+        outDir: string,
         ffProbeResult: string
-    ) { 
+    ) {
         super(context, relPath, outDir);
 
         // parse ffprobe output
@@ -50,7 +50,7 @@ export class AudioInfo extends MediaInfo {
     }
 
     static async getInstance(
-        context: Context, 
+        context: Context,
         relPath: string
     ): Promise<AudioInfo> {
         const ffprobeOutput = await (context.exec('ffprobe', [
@@ -60,7 +60,7 @@ export class AudioInfo extends MediaInfo {
             '-of', 'json',
             context.toDiskPath(relPath)
         ], { timeout: ffprobeTimeout })).result();
-    
+
         const outDir = await MediaInfo.createOutDir(context, relPath)
         return new AudioInfo(context, relPath, outDir, ffprobeOutput);
     }

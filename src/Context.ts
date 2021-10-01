@@ -8,7 +8,7 @@ export const processCleanupTimeout = 6 * 60 * 60 * 1000; // millisecs.
 
 /**
  * Main entry point for a program instance. You can run multiple instances as long as they use different ports and output paths.
- * 
+ *
  * Returns an async function to clean up.
  */
 export class Context {
@@ -38,7 +38,7 @@ export class Context {
     }
 
     public exec(
-        command: string, 
+        command: string,
         args: string[],
         { timeout, cwd } : { timeout?: number, cwd?: string } = {}
     ): SubProcessInvocation {
@@ -69,10 +69,10 @@ export class Context {
 
     public async cleanup() {
         if (this.termination == null) {
-			this.termination = Promise.all([
+            this.termination = Promise.all([
                 Promise.all(Array.from(this.allSubProcesses).map(process => process.kill())),
-			]);
-		}
-		return this.termination;
+            ]);
+        }
+        return this.termination;
     }
 }
