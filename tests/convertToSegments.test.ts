@@ -26,7 +26,9 @@ describe('MediaInfo', function() {
         [ 1, 1, 1 ],
         [ 5, 1, 9 ],
         [ 10 ],
-        [ 0, 10, 20 ]
+        [ 0, 10, 20 ],
+        [ 1 ],
+        [ 0 ],
       ]
 
       for (const [ segmentLength, segmentOffset ] of segmentTimes) {

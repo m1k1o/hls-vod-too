@@ -47,36 +47,41 @@ export abstract class MediaInfo {
         const minSegmentLength = segmentLength - segmentOffset;
         const maxSegmentLength = segmentLength + segmentOffset;
 
-        const timeList = [...rawTimeList, duration];
-        const segmentStartTimes = [0];
+        const timeList = [ ...rawTimeList, duration ];
+        const segmentStartTimes = [ 0 ];
 
         let lastTime = 0;
         for (const time of timeList) {
+            // Skip it regardless.
             if (time - lastTime < minSegmentLength) {
-                // Skip it regardless.
-            } else if (time - lastTime < maxSegmentLength) {
-                // Use it as-is.
+                continue
+            }
+
+            // Use it as-is.
+            if (time - lastTime < maxSegmentLength) {
                 lastTime = time;
                 segmentStartTimes.push(lastTime);
-            } else {
-                const numOfSegmentsNeeded = Math.ceil((time - lastTime) / segmentLength);
-                const durationOfEach = (time - lastTime) / numOfSegmentsNeeded;
-                for (let i = 1; i < numOfSegmentsNeeded; i++) {
-                    lastTime += durationOfEach;
-                    segmentStartTimes.push(lastTime);
-                }
+                continue
+            }
 
-                // Use time directly instead of setting in the loop so we won't lose accuracy due to float point precision limit.
-                lastTime = time;
+            // Count segments between current and last time.
+            const numOfSegmentsNeeded = Math.ceil((time - lastTime) / segmentLength);
+            const durationOfEach = (time - lastTime) / numOfSegmentsNeeded;
+            for (let i = 1; i < numOfSegmentsNeeded; i++) {
+                lastTime += durationOfEach;
                 segmentStartTimes.push(lastTime);
             }
+
+            // Use time directly instead of setting in the loop so we won't lose accuracy due to float point precision limit.
+            lastTime = time;
+            segmentStartTimes.push(lastTime);
         }
 
         if (segmentStartTimes.length > 1) {
             // Would be equal to duration unless the skip branch is executed for the last segment, which is fixed below.
             segmentStartTimes.pop();
 
-            const lastSegmentLength = duration - segmentStartTimes[segmentStartTimes.length - 1];
+            const lastSegmentLength = duration - lastTime;
             if (lastSegmentLength > maxSegmentLength) {
                 segmentStartTimes.push(duration - lastSegmentLength / 2);
             }
