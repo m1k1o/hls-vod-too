@@ -34,39 +34,50 @@ export abstract class MediaInfo {
      * Returns all segments endpoints, including video starting time (0) and end time.
      *
      * - Use keyframes (i.e. I-frame) as much as possible.
-     * - For each key frame, if it's over 4.75 seconds since the last keyframe, insert a breakpoint between them in an evenly, such that the breakpoint distance is <= 3.5 seconds (per https://bitmovin.com/mpeg-dash-hls-segment-length/).
-     *   Example: key frame at 20.00 and 31.00, split at 22.75, 25.5, 28.25.
-     * - If the duration between two key frames is smaller than 2.25 seconds, ignore the existance of the second key frame.
+     * - For each key frame, if it's over (maxSegmentLength) seconds since the last keyframe, insert a breakpoint between them in an evenly,
+     *   such that the breakpoint distance is <= (segmentLength) seconds (per https://bitmovin.com/mpeg-dash-hls-segment-length/).
+     *   Example:
+     *    segmentLength = 3.5
+     *    key frame at 20.00 and 31.00, split at 22.75, 25.5, 28.25.
+     * - If the duration between two key frames is smaller than (minSegmentLength) seconds, ignore the existance of the second key frame.
      *
-     * This guarantees that all segments are between the duration 2.33 s and 4.75 s.
+     * This guarantees that all segments are between the duration (minSegmentLength) seconds and (maxSegmentLength) seconds.
      */
-    protected static convertToSegments(rawTimeList: Float64Array, duration: number): Float64Array {
+    static convertToSegments(rawTimeList: Float64Array, duration: number, segmentLength = 3.5, segmentOffset = 1.25): Float64Array {
+        const minSegmentLength = segmentLength - segmentOffset;
+        const maxSegmentLength = segmentLength + segmentOffset;
+
         const timeList = [...rawTimeList, duration];
         const segmentStartTimes = [0];
+
         let lastTime = 0;
         for (const time of timeList) {
-            if (time - lastTime < 2.25) {
+            if (time - lastTime < minSegmentLength) {
                 // Skip it regardless.
-            } else if (time - lastTime < 4.75) {
+            } else if (time - lastTime < maxSegmentLength) {
                 // Use it as-is.
                 lastTime = time;
                 segmentStartTimes.push(lastTime);
             } else {
-                const numOfSegmentsNeeded = Math.ceil((time - lastTime) / 3.5);
+                const numOfSegmentsNeeded = Math.ceil((time - lastTime) / segmentLength);
                 const durationOfEach = (time - lastTime) / numOfSegmentsNeeded;
                 for (let i = 1; i < numOfSegmentsNeeded; i++) {
                     lastTime += durationOfEach;
                     segmentStartTimes.push(lastTime);
                 }
-                lastTime = time; // Use time directly instead of setting in the loop so we won't lose accuracy due to float point precision limit.
-                segmentStartTimes.push(time);
+
+                // Use time directly instead of setting in the loop so we won't lose accuracy due to float point precision limit.
+                lastTime = time;
+                segmentStartTimes.push(lastTime);
             }
         }
 
         if (segmentStartTimes.length > 1) {
-            segmentStartTimes.pop(); // Would be equal to duration unless the skip branch is executed for the last segment, which is fixed below.
+            // Would be equal to duration unless the skip branch is executed for the last segment, which is fixed below.
+            segmentStartTimes.pop();
+
             const lastSegmentLength = duration - segmentStartTimes[segmentStartTimes.length - 1];
-            if (lastSegmentLength > 4.75) {
+            if (lastSegmentLength > maxSegmentLength) {
                 segmentStartTimes.push(duration - lastSegmentLength / 2);
             }
         }
