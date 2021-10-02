@@ -293,7 +293,7 @@ export class MediaBackend {
         ].join(os.EOL);
     }
 
-    getSegment(clientId: string, segmentNumber: string, request: express.Request, response: express.Response): void {
+    async getSegment(clientId: string, segmentNumber: string, request: express.Request, response: express.Response): Promise<void> {
         let clientInfo = this.clients.get(clientId);
         if (!clientInfo) {
             clientInfo = { head: -1 };
@@ -306,19 +306,24 @@ export class MediaBackend {
         const segmentIndex = parseInt(segmentNumber, 16) - 1;
         assert(!isNaN(segmentIndex) && (segmentIndex >= 0) && (segmentIndex < this.breakpoints.length - 1), `Segment index out of range.`);
 
+        let fileName = `${this.config.preset.name}-${((segmentIndex + 1e5) % 1e6).toString().substr(1)}.ts`;
         const fileReady = this.segmentStatus[segmentIndex] === DONE;
-        this.onGetSegment(clientInfo, segmentIndex);
+        await this.onGetSegment(clientInfo, segmentIndex);
 
-        if (fileReady) {
-            const fileName = `${this.config.preset.name}-${((segmentIndex + 1e5) % 1e6).toString().substr(1)}.ts`;
-            const filePath = path.join(this.outDir, fileName);
-            response.sendFile(filePath);
-            return;
+        if (!fileReady) {
+            try {
+                fileName = await new Promise((res, rej) => {
+                    const callback = (errorInfo: string, fileName: string) => (errorInfo ? rej(errorInfo) : res(fileName));
+                    this.encodingDoneEmitter.once(`${segmentIndex}`, callback);
+                    request.on('close', () => this.encodingDoneEmitter.removeListener(`${segmentIndex}`, callback));
+                })
+            } catch (error: any) {
+                response.status(500).send(error)
+                return
+            }
         }
 
-        const callback = (errorInfo: string, fileName: string) => (errorInfo ? response.status(500).send(errorInfo) : response.sendFile(path.join(this.outDir, fileName)));
-        this.encodingDoneEmitter.once(`${segmentIndex}`, callback);
-        request.on('close', () => this.encodingDoneEmitter.removeListener(`${segmentIndex}`, callback));
+        response.sendFile(path.join(this.outDir, fileName))
     }
 
     async removeClient(clientId: string) {

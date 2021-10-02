@@ -236,10 +236,13 @@ export class HlsVod {
             respond(response, this.getBackend(request.params['client'], ensureType(request.params['type']), request.params['file'], request.params['quality']).then(backend => backend.getVariantManifest()));
         });
 
-        app.get('/:type.:client/:file/:quality.:segment.ts', (request, response) => {
-            this.getBackend(request.params['client'], ensureType(request.params['type']), request.params['file'], request.params['quality']).then(media =>
-                media.getSegment(request.params['client'], request.params['segment'], request, response)
-            ).catch(defaultCatch);
+        app.get('/:type.:client/:file/:quality.:segment.ts', async (request, response) => {
+            try {
+                const media = await this.getBackend(request.params['client'], ensureType(request.params['type']), request.params['file'], request.params['quality'])
+                await media.getSegment(request.params['client'], request.params['segment'], request, response)
+            } catch (error: any) {
+                response.status(500).send(error.stack || error.toString());
+            }
         });
 
         app.delete('/hls.:client/', (request, response) => {
