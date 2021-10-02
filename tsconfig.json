@@ -6,5 +6,10 @@
         "strict": true,
         "moduleResolution": "node"
     },
-    "include": ["hls-vod.ts"]
+    "include": ["hls-vod.ts"],
+    "exclude": [
+        "./tests/",
+        "./node_modules/",
+        "./dist/"
+    ],
 }
