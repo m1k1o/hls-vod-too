@@ -56,7 +56,7 @@ export class AudioInfo extends MediaInfo {
         const ffprobeOutput = await (context.exec('ffprobe', [
             '-v', 'error', // Hide debug information
             '-show_entries', 'stream=duration,bit_rate',
-            '-select_streams', 'a', // Video stream only, we're not interested in audio
+            '-select_streams', 'a', // Audio stream only, we're not interested in video
             '-of', 'json',
             context.toDiskPath(relPath)
         ], { timeout: ffprobeTimeout })).result();

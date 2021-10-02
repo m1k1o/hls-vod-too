@@ -44,8 +44,6 @@ export class VideoInfo extends MediaInfo {
         // set breakpoints
         this.breakpoints = MediaInfo.convertToSegments(rawIFrames, duration);
 
-        // set rel path
-
         // get quality presets available for current video
         let presets = qualityLevelPresets.filter(preset => preset.resolution <= resolution);
 

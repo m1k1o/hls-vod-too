@@ -34,7 +34,6 @@ export class Context {
         this.videoMinBufferLength = parseInt(params['buffer-length']) || 30;
         this.videoMaxBufferLength = this.videoMinBufferLength * 2;
         this.maxClientNumber = parseInt(params['max-client-number']) || 5;
-
     }
 
     public exec(
@@ -65,7 +64,7 @@ export class Context {
         return path.join(this.rootPath, path.join('/', relPath));
     }
 
-    private termination: Promise<unknown> | null = null;
+    private termination: Promise<any> | null = null;
 
     public async cleanup() {
         if (this.termination == null) {
@@ -73,6 +72,7 @@ export class Context {
                 Promise.all(Array.from(this.allSubProcesses).map(process => process.kill())),
             ]);
         }
+
         return this.termination;
     }
 }

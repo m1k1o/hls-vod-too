@@ -54,6 +54,7 @@ export class MediaBackend {
     ) {
         assert.strictEqual(config.backend, null, 'Backend already exists.');
         config.backend = this;
+
         this.segmentStatus = new Uint8Array(breakpoints.length - 1); // Defaults to EMPTY.
         this.segmentStatus.fill(EMPTY);
     }
@@ -66,11 +67,14 @@ export class MediaBackend {
             if (this.segmentStatus.some(id => id === attempt)) {
                 continue;
             }
+
             if (Array.from(this.encoderHeads.values()).some(encoder => encoder.id === attempt)) {
                 continue;
             }
+
             return this.lastAssignedId = attempt;
         }
+
         throw new Error('No available Uint8 value.');
     }
 

@@ -24,14 +24,13 @@ if (require.main === module) {
         process.exit();
     }
 
-    const server = new HlsVod(
-        parseArgs(process.argv.slice(2), {
-            string: ['port', 'root-path', 'ffmpeg-binary-dir', 'cache-path', 'buffer-length', 'max-client-number'],
-            boolean: ['debug', 'no-short-circuit'],
-            unknown: () => exitWithUsage(process.argv)
-        })
-    );
+    const args = parseArgs(process.argv.slice(2), {
+        string: ['port', 'root-path', 'ffmpeg-binary-dir', 'cache-path', 'buffer-length', 'max-client-number'],
+        boolean: ['debug', 'no-short-circuit'],
+        unknown: () => exitWithUsage(process.argv)
+    });
 
+    const server = new HlsVod(args);
     server.init();
 
     process.on('SIGINT', () => server.cleanup());
