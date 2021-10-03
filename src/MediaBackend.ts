@@ -151,15 +151,19 @@ export class MediaBackend {
             input: transcoder.stdout,
         }).on('line', tsFileName => {
             assert(tsFileName.startsWith(this.config.preset.name + '-') && tsFileName.endsWith('.ts'), `Unexpected segment produced by ffmpeg: ${tsFileName}.`);
+
             const index = parseInt(tsFileName.substring(this.config.preset.name.length + 1, tsFileName.length - 3), 10);
             if (index !== status.head) {
                 if (this.segmentStatus[status.head] === encoderId) {
                     this.segmentStatus[status.head] = EMPTY;
                 }
+
                 this.log(`Unexpected segment produced by ffmpeg: index was ${index} while head was ${status.head}.`);
             }
+
             this.segmentStatus[index] = DONE;
             this.encodingDoneEmitter.emit(`${index}`, null, tsFileName);
+
             if (index >= endAt - 1) {
                 // Nothing specifically need to be done here. FFmpeg will exit automatically.
             } else if (this.segmentStatus[index + 1] !== EMPTY) {
@@ -169,7 +173,8 @@ export class MediaBackend {
                 let needToContinue = false;
 
                 this.clients.forEach(client => {
-                    if (client.transcoder !== transcoder) { return; }
+                    if (client.transcoder !== transcoder) return;
+
                     const playhead = client.head;
                     const bufferedLength = this.breakpoints[index + 1] - this.breakpoints[playhead]; // Safe to assume all segments in between are encoded as long as the client is attached to this transcoder.
                     if (bufferedLength < this.context.videoMaxBufferLength) {
@@ -213,8 +218,9 @@ export class MediaBackend {
             if (value.deleted || value.head < 0) {
                 return null;
             }
-            const segmentIndex = value.head;
+
             // Traverse through all the segments within mandatory buffer range.
+            const segmentIndex = value.head;
             const startTime = this.breakpoints[segmentIndex];
             let shouldStartFromSegment = -1;
             for (let i = segmentIndex; (i < this.breakpoints.length - 1) && (this.breakpoints[i] - startTime < this.context.videoMinBufferLength); i++) {
@@ -223,6 +229,7 @@ export class MediaBackend {
                     break;
                 }
             }
+
             return (shouldStartFromSegment >= 0) ? {
                 client,
                 firstToEncode: shouldStartFromSegment,
@@ -236,12 +243,14 @@ export class MediaBackend {
                 playHead.ref.transcoder = exactMatch.process;
                 return false;
             }
+
             const minusOneMatch = encoders.get(playHead.firstToEncode - 1);
             if (minusOneMatch) {
                 minusOneMatch.clients.push(playHead.client);
                 playHead.ref.transcoder = minusOneMatch.process;
                 return false;
             }
+
             return true; // There isn't an existing encoder head for it yet!
         }).sort((a, b) => a.firstToEncode - b.firstToEncode);
 
@@ -261,6 +270,7 @@ export class MediaBackend {
                 current.ref.transcoder = lastStartedProcess.process;
                 continue;
             }
+
             const process = this.startTranscode(current.firstToEncode);
             current.ref.transcoder = process;
             lastStartedProcess = { index: current.firstToEncode, process };

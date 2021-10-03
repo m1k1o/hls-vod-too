@@ -95,6 +95,7 @@ export class HlsVod {
                 }
             });
         }
+
         const newLookupPromise = this.cachedMedia.get(type + file).then(mediaInfo => mediaInfo.getBackendByQualityLevel(qualityLevel))
         this.clientTracker.set(clientId, newLookupPromise);
         return newLookupPromise;
@@ -105,12 +106,12 @@ export class HlsVod {
             console.log(`Client ${clientId} unregistering...`);
         }
 
-        const existing = this.clientTracker.get(clientId);
-        if (!existing) {
+        const backend = await this.clientTracker.get(clientId);
+        if (!backend) {
             return;
         }
 
-        existing.then(backend => backend.removeClient(clientId));
+        backend.removeClient(clientId);
         this.clientTracker.delete(clientId);
     }
 
@@ -157,19 +158,15 @@ export class HlsVod {
         const duration = parseFloat(probeResult['streams'][0]['duration']) || parseFloat(probeResult['format']['duration']);
         assert(!isNaN(duration));
 
-        const vf = `fps=1/${(duration / numOfFrames)}`;
-
         const encoderChild = this.context.exec('ffmpeg', [
             '-loglevel', 'warning',
             '-ignore_chapters', '1',
             '-i', fsPath,
-            '-vf', `${vf},scale=${singleWidth}:-2${onePiece ? `,tile=${xCount}x${yCount}` : ''}'`,
+            '-vf', `fps=1/${(duration / numOfFrames)},scale=${singleWidth}:-2${onePiece ? `,tile=${xCount}x${yCount}` : ''}'`,
             '-f', 'image2pipe',
             ...(onePiece ? ['-vframes', '1'] : ''),
             '-'
-        ], {
-            timeout: 60 * 1000
-        });
+        ], { timeout: 60 * 1000 });
 
         encoderChild.stdout.pipe(response);
         response.setHeader('Content-Type', 'image/jpeg');
@@ -191,13 +188,17 @@ export class HlsVod {
                 '-of', 'json',
                 this.context.toDiskPath(filePath)
             ], { timeout: ffprobeTimeout })).result());
+
             const format = probeResult['format']['format_name'].split(',')[0];
             const audioStream = probeResult['streams'].find((stream: Record<string, string>) => stream['codec_type'] === 'audio');
             const videoStream = probeResult['streams'].find((stream: Record<string, string>) => stream['codec_type'] === 'video' && !HlsVod.isId3Image(stream));
             const duration = (videoStream ? parseFloat(videoStream['duration']) : 0) || (audioStream ? parseFloat(audioStream['duration']) : 0) || parseFloat(probeResult['format']['duration']);
 
             const isVideo = !!videoStream && (duration > 0.5);
-            if (!isVideo) { assert(!!audioStream, 'Neither video or audio stream is found.'); }
+            if (!isVideo) {
+                assert(!!audioStream, 'Neither video or audio stream is found.');
+            }
+
             return {
                 type: isVideo ? 'video' : 'audio',
                 maybeNativelySupported:
