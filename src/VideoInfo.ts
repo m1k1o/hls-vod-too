@@ -70,6 +70,7 @@ export class VideoInfo extends MediaInfo {
         relPath: string
     ): Promise<VideoInfo> {
         const ffprobeOutput = await (context.exec('ffprobe', [
+            '-ignore_chapters', '1',
             '-v', 'error', // Hide debug information
             '-skip_frame', 'nokey', '-show_entries', 'frame=pkt_pts_time', // List all I frames
             '-show_entries', 'format=duration',

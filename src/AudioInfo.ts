@@ -55,6 +55,7 @@ export class AudioInfo extends MediaInfo {
     ): Promise<AudioInfo> {
         const ffprobeOutput = await (context.exec('ffprobe', [
             '-v', 'error', // Hide debug information
+            '-ignore_chapters', '1',
             '-show_entries', 'stream=duration,bit_rate',
             '-select_streams', 'a', // Audio stream only, we're not interested in video
             '-of', 'json',
