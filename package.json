@@ -7,7 +7,7 @@
     {
       "name": "Mikael Finstad",
       "email": "finstaden@gmail.com",
-      "url": "mifi.no"
+      "url": "https://mifi.no"
     }
   ],
   "license": "MIT",
@@ -16,7 +16,7 @@
     "static"
   ],
   "scripts": {
-    "start": "ts-node hls-vod.ts --debug",
+    "start": "ts-node hls-vod.ts",
     "prepare": "tsc && shebang-trim hls-vod.js",
     "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register 'tests/**/*.ts'"
   },
