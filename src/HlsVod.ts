@@ -147,7 +147,6 @@ export class HlsVod {
 
         const probeResult = JSON.parse(await (this.context.exec('ffprobe', [
             '-v', 'error', // Hide debug information
-            '-ignore_chapters', '1',
             '-show_entries', 'stream=duration', // Show duration
             '-show_entries', 'format=duration', // Show duration
             '-select_streams', 'v', // Video stream only, we're not interested in audio
@@ -160,7 +159,6 @@ export class HlsVod {
 
         const encoderChild = this.context.exec('ffmpeg', [
             '-loglevel', 'warning',
-            '-ignore_chapters', '1',
             '-i', fsPath,
             '-vf', `fps=1/${(duration / numOfFrames)},scale=${singleWidth}:-2${onePiece ? `,tile=${xCount}x${yCount}` : ''}'`,
             '-f', 'image2pipe',
@@ -182,7 +180,6 @@ export class HlsVod {
         try {
             const probeResult = JSON.parse(await (this.context.exec('ffprobe', [
                 '-v', 'error', // Hide debug information
-                '-ignore_chapters', '1',
                 '-show_format', // Show container information
                 '-show_streams', // Show codec information
                 '-of', 'json',

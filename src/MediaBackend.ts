@@ -98,7 +98,6 @@ export class MediaBackend {
 
         const transcoder = this.context.exec('ffmpeg', [
             '-loglevel', 'warning',
-            '-ignore_chapters', '1',
             ...(startAt ? ['-ss', `${this.breakpoints[startAt]}`] : []), // Seek to start point. Note there is a bug(?) in ffmpeg: https://github.com/FFmpeg/FFmpeg/blob/fe964d80fec17f043763405f5804f397279d6b27/fftools/ffmpeg_opt.c#L1240 can possible set `seek_timestamp` to a negative value, which will cause `avformat_seek_file` to reject the input timestamp. To prevent this, the first break point, which we know will be zero, will not be fed to `-ss`.
             '-i', this.context.toDiskPath(this.relPath), // Input file
             '-to', `${this.breakpoints[endAt]}`,
